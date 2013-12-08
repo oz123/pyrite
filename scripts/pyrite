@@ -34,8 +34,7 @@
 
 import argparse
 from sys import argv
-import modules.core
-
+from Pyrite import core
 # Parse command-line arguments
 parser = argparse.ArgumentParser(
     prog='pyrite',
@@ -66,7 +65,8 @@ parser.add_argument('-c', '--symmetric', action='store_true',
                     help="enable symmetric encryption mode")
 
 parser.add_argument('-r', '--recipients', metavar='RECIP',
-                    help="recipients for asymmetric mode (semicolon-separated)")
+                    help=("recipients for "
+                    "asymmetric mode (semicolon-separated)"))
 
 parser.add_argument('-k', '--defaultkey', metavar='KEYUID',
                     help="override default gpg private key")
@@ -77,15 +77,15 @@ parser.add_argument('-b', '--backend', choices=('gpg', 'openssl'),
 args = parser.parse_args()
 
 # If no cmdline options specified, let's save some cycles later
-if len(argv) == 1:  args = None
+if len(argv) == 1:
+    args = None
 
 
 if __name__ == "__main__":
-    
-    FeS2 = modules.core.Pyrite(args)
+
+    FeS2 = core.Pyrite(args)
     try:
         FeS2.main()
     except KeyboardInterrupt:
         print
         exit()
-
