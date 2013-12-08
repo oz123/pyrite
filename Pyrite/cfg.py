@@ -25,10 +25,11 @@
 
 import gtk
 from os import getenv
+import os.path
 
 # Important variables
 VERSION                 = 'v1.0.1'
-ASSETDIR                = '/usr/share/pyrite/'
+ASSETDIR                = os.path.dirname(__file__)
 USERPREF_FILE           = getenv('HOME') + './config/pyrite'
 USERPREF_FORMAT_INFO    = {'version':'Must6fa'}
 

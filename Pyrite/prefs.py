@@ -32,19 +32,19 @@ from os import access, R_OK
 # Custom Modules:
 import cfg
 from messages import PREFS_MESSAGE_DICT as MESSAGE_DICT
-
+import os.path
 
 
 class Preferences:
     """Preferences system.
-    
+
     Try to read preferences from user preferences file; failing that, initialize
     good defaults. This class also includes the Preferences-setting window.
     """
-    
-    
+
+
     def __init__(self, reset_defaults=False):
-        
+
         try:
             if reset_defaults:
                 raise Exception
@@ -54,7 +54,7 @@ class Preferences:
                     raise Exception
                 self.p = dict(pickle.load(f))
             stderr.write("Pyrite loaded preferences from file {!r}\n".format(cfg.USERPREF_FILE))
-        
+
         except:
             stderr.write("Pyrite loaded default preferences\n")
             # Default preferences
@@ -89,22 +89,22 @@ class Preferences:
                 errfntsize=7,
                 color_fg='#000000000000',
                 color_bg='#ffffffffffff')
-    
-    
+
+
     def infobar(self, id, filename=None, customtext=None):
         """Popup a new auto-hiding InfoBar."""
-        
+
         # CB for destroy timeout
         def destroy_ibar():
             self.ibar_timeout = 0
             self.ibar.destroy()
             self.window.resize(1,1)
-        
+
         # If infobar already active: delete old timeout, destroy old ibar
         if self.ibar_timeout > 0:
             glib.source_remove(self.ibar_timeout)
             destroy_ibar()
-        
+
         # Find the needed dictionary inside our message dict, by id
         MSG = MESSAGE_DICT[id]
         # Use value from MSG type & icon to lookup Gtk constant, e.g. gtk.MESSAGE_INFO
@@ -114,8 +114,8 @@ class Preferences:
         message = ("<span foreground='#2E2E2E'>" +
                    MSG['text'].format(filename=filename, customtext=customtext) +
                    "</span>")
-        
-        # Now that we have all the data we need, START creating!     
+
+        # Now that we have all the data we need, START creating!
         self.ibar               = gtk.InfoBar()
         self.ibar.set_message_type(msgtype)
         self.vbox_ib.pack_end   (self.ibar, False, False)
@@ -130,13 +130,13 @@ class Preferences:
         label.show              ()
         self.ibar.show          ()
         self.ibar_timeout       = glib.timeout_add_seconds(MSG['timeout'], destroy_ibar)
-    
-    
+
+
     def open_preferences_window(self, parentwindow):
         """Show the preferences window. Duh."""
         self.ibar_timeout = 0
         builder = gtk.Builder()
-        builder.add_from_file(cfg.ASSETDIR + 'ui/preferences.glade')
+        builder.add_from_file(os.path.join(cfg.ASSETDIR, 'ui/preferences.glade'))
         # Main window
         self.window         = builder.get_object('window1')
         self.btn_save       = builder.get_object('btn_save')
@@ -182,8 +182,8 @@ class Preferences:
         self.populate_pref_window_prefs()
         builder.connect_signals(self)
         self.window.show()
-    
-    
+
+
     def populate_pref_window_prefs(self):
         """Set state of widgets in prefs window via preferences."""
         # Main Operation Mode
@@ -216,8 +216,8 @@ class Preferences:
         self.sp_errfntsize.set_value    (self.p['errfntsize'])
         self.btn_color_fg.set_color     (gtk.gdk.color_parse(self.p['color_fg']))
         self.btn_color_bg.set_color     (gtk.gdk.color_parse(self.p['color_bg']))
-    
-    
+
+
     def capture_current_prefs(self):
         """Capture current state of widgets in prefs window & save as preferences."""
         self.p = {
@@ -252,8 +252,8 @@ class Preferences:
             'color_fg'    : self.btn_color_fg.get_color().to_string(),
             'color_bg'    : self.btn_color_bg.get_color().to_string()}
         return self.p
-    
-    
+
+
     # Called by Save button
     def save_prefs(self):
         """Attempt to save user prefs to homedir prefs file."""
@@ -266,42 +266,42 @@ class Preferences:
             self.infobar('prefs_save_failed', cfg.USERPREF_FILE)
             return False
         return True
-    
-    
+
+
     # Called by Cancel button
     def action_cancel_prefs(self, w):
         """Close prefs window without doing anything."""
         self.window.destroy()
-    
-    
+
+
     # Called by Revert button
     def action_revert_prefs(self, w):
         """Reset state of widgets in prefs window via external preferences file, if avail."""
         self.__init__()
         self.populate_pref_window_prefs()
         self.infobar('prefs_reverted')
-    
-    
+
+
     # Called by Defaults button
     def action_default_prefs(self, w):
         """Reset state of widgets in prefs window to predefined defaults."""
         self.__init__(reset_defaults=True)
         self.populate_pref_window_prefs()
         self.infobar('prefs_reset_to_defaults')
-    
-    
+
+
     def action_tg_enctoself(self, w):
         """Show some info when user enables enctoself toggle."""
         if w.get_active():
             self.infobar('prefs_notice_enctoself')
-    
-    
+
+
     def action_tg_addsig(self, w):
         """Show some info when user enables addsig toggle."""
         if w.get_active():
             self.infobar('prefs_notice_addsig')
-    
-    
+
+
     def action_cb_enctype(self, w):
         """Show some info when user chooses 'Both' in  enctype combobox."""
         if w.get_active() == 2:
